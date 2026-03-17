@@ -4,10 +4,7 @@
 #include <string.h>
 
 typedef struct {
-	int rows;
-	int cols;
-	char empty;
-	char obstacle;
-	char full;
-	char **map;
+    int rows, cols;
+    char empty, obs, full;
+    char **map;
 } t_bsq;
