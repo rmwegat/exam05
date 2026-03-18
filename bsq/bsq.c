@@ -8,7 +8,8 @@ int min3(int a, int b, int c) {
 }
 
 void solve(FILE *f) {
-    int rows = 0, cols = 0, max = 0, max_r = 0, max_c = 0, err = 0;
+    int rows = 0, cols = 0, max = 0;
+    int max_r = 0, max_c = 0, err = 0;
     char empty, obs, full;
     
     char **map = NULL;
@@ -16,7 +17,8 @@ void solve(FILE *f) {
     char *line = NULL;
     size_t len = 0;
 
-    if (fscanf(f, "%d %c %c %c\n", &rows, &empty, &obs, &full) != 4) {
+    if (fscanf(f, "%d %c %c %c\n", \
+        &rows, &empty, &obs, &full) != 4) {
         err = 1; goto end;
     }
 
@@ -24,23 +26,26 @@ void solve(FILE *f) {
     dp = calloc(rows, sizeof(int*));
 
     for (int r = 0; r < rows; r++) {
-        if (getline(&line, &len, f) == -1) { err = 1; goto end; }
+        if (getline(&line, &len, f) == -1)
+            err = 1; goto end;
         line[strcspn(line, "\n")] = 0; 
         
         if (r == 0) cols = strlen(line);
-        else if ((int)strlen(line) != cols) { err = 1; goto end; }
+        else if ((int)strlen(line) != cols)
+            err = 1; goto end;
 
         map[r] = strdup(line);
         dp[r] = calloc(cols, sizeof(int));
 
         for (int c = 0; c < cols; c++) {
-            if (map[r][c] != empty && map[r][c] != obs) { err = 1; goto end; }
+            if (map[r][c] != empty && map[r][c] != obs)
+                err = 1; goto end;
             
             if (map[r][c] == obs) {
                 dp[r][c] = 0;
             } else {
-                dp[r][c] = (r == 0 || c == 0) \
-                ? 1 : min3(dp[r-1][c], dp[r][c-1], dp[r-1][c-1]) + 1;
+                dp[r][c] = (r == 0 || c == 0) ? 1 : \
+                min3(dp[r-1][c], dp[r][c-1], dp[r-1][c-1]) + 1;
                 if (dp[r][c] > max) {
                     max = dp[r][c];
                     max_r = r;
