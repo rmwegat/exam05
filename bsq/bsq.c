@@ -10,15 +10,14 @@ int min3(int a, int b, int c) {
 void solve(FILE *f) {
     int rows = 0, cols = 0, max = 0;
     int max_r = 0, max_c = 0, err = 0;
-    char empty, obs, full;
+    char empty, obs, full, extra;
     
     char **map = NULL;
     int **dp = NULL;
     char *line = NULL;
     size_t len = 0;
 
-    if (fscanf(f, "%d %c %c %c\n", \
-        &rows, &empty, &obs, &full) != 4) {
+    if (fscanf(f, "%d %c %c %c%c", &rows, &empty, &obs, &full, &extra) != 5 || extra != '\n') {
         err = 1; goto end;
     }
 
@@ -26,20 +25,27 @@ void solve(FILE *f) {
     dp = calloc(rows, sizeof(int*));
 
     for (int r = 0; r < rows; r++) {
-        if (getline(&line, &len, f) == -1)
-            err = 1; goto end;
-        line[strcspn(line, "\n")] = 0; 
+        if (getline(&line, &len, f) == -1) {
+            err = 1;
+            goto end;
+        }
+        line[strcspn(line, "\n")] = 0; //illegal function in exam
         
         if (r == 0) cols = strlen(line);
-        else if ((int)strlen(line) != cols)
-            err = 1; goto end;
+        else if ((int)strlen(line) != cols) //illegal function in exam
+        {
+            err = 1;
+            goto end;
+        }
 
-        map[r] = strdup(line);
+        map[r] = strdup(line); //illegal function in exam
         dp[r] = calloc(cols, sizeof(int));
 
         for (int c = 0; c < cols; c++) {
-            if (map[r][c] != empty && map[r][c] != obs)
-                err = 1; goto end;
+            if (map[r][c] != empty && map[r][c] != obs) {
+                err = 1;
+                goto end;
+            }
             
             if (map[r][c] == obs) {
                 dp[r][c] = 0;
@@ -63,7 +69,7 @@ end:
                 map[r][c] = full;
             }
         }
-        for (int r = 0; r < rows; r++) puts(map[r]);
+        for (int r = 0; r < rows; r++) printf("%s\n", map[r]);
     }
 
     if (map) {
