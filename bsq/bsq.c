@@ -2,19 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-int m3(int a, int b, int c) {
-    int m = a < b ? a : b;
-    return m < c ? m : c;
+int min3(int a, int b, int c) {
+    int min = a < b ? a : b;
+    return min < c ? min : c;
 }
 
 void solve(FILE *f) {
-    int rows = 0, cols = 0, max = 0, mr = 0, mc = 0, err = 0;
-    char e, o, x;
-    char **map = NULL; int **dp = NULL; char *line = NULL; size_t len = 0;
+    int rows = 0, cols = 0, max = 0, max_r = 0, max_c = 0, err = 0;
+    char empty, obs, full;
+    
+    char **map = NULL;
+    int **dp = NULL;
+    char *line = NULL;
+    size_t len = 0;
 
-    if (fscanf(f, "%d %c %c %c\n", &rows, &e, &o, &x) != 4) { err = 1; goto end; }
+    if (fscanf(f, "%d %c %c %c\n", &rows, &empty, &obs, &full) != 4) {
+        err = 1; goto end;
+    }
 
-    // Use calloc so uninitialized rows start as NULL (safe to free later)
     map = calloc(rows, sizeof(char*));
     dp = calloc(rows, sizeof(int*));
 
@@ -29,11 +34,18 @@ void solve(FILE *f) {
         dp[r] = calloc(cols, sizeof(int));
 
         for (int c = 0; c < cols; c++) {
-            if (map[r][c] != e && map[r][c] != o) { err = 1; goto end; }
-            if (map[r][c] == o) dp[r][c] = 0;
-            else {
-                dp[r][c] = (r == 0 || c == 0) ? 1 : m3(dp[r-1][c], dp[r][c-1], dp[r-1][c-1]) + 1;
-                if (dp[r][c] > max) { max = dp[r][c]; mr = r; mc = c; }
+            if (map[r][c] != empty && map[r][c] != obs) { err = 1; goto end; }
+            
+            if (map[r][c] == obs) {
+                dp[r][c] = 0;
+            } else {
+                dp[r][c] = (r == 0 || c == 0) \
+                ? 1 : min3(dp[r-1][c], dp[r][c-1], dp[r-1][c-1]) + 1;
+                if (dp[r][c] > max) {
+                    max = dp[r][c];
+                    max_r = r;
+                    max_c = c;
+                }
             }
         }
     }
@@ -41,12 +53,14 @@ void solve(FILE *f) {
 end:
     if (err) fprintf(stderr, "map error\n");
     else {
-        for (int r = mr - max + 1; r <= mr; r++)
-            for (int c = mc - max + 1; c <= mc; c++) map[r][c] = x;
+        for (int r = max_r - max + 1; r <= max_r; r++) {
+            for (int c = max_c - max + 1; c <= max_c; c++) {
+                map[r][c] = full;
+            }
+        }
         for (int r = 0; r < rows; r++) puts(map[r]);
     }
 
-    // --- LEAK CLEANUP ---
     if (map) {
         for (int r = 0; r < rows; r++) free(map[r]);
         free(map);
@@ -55,7 +69,7 @@ end:
         for (int r = 0; r < rows; r++) free(dp[r]);
         free(dp);
     }
-    free(line); // getline allocates 'line' even if it crashes
+    free(line);
 }
 
 int main(int ac, char **av) {
